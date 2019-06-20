@@ -1,0 +1,643 @@
+<?php
+/**
+ * This makes the child theme work. If you need any
+ * additional features or let's say menus, do it here.
+ *
+ * @return void
+ */
+function eyelikedesign_starter_themesetup() {
+
+	load_child_theme_textdomain( 'eyelikedesign', get_stylesheet_directory() . '/languages' );
+
+	// Register an additional Menu Location
+	register_nav_menus( array(
+		'meta' => __( 'Meta Menu', 'eyelikedesign' )
+	) );
+
+	// Add support for custom backgrounds and overwrite the parent backgorund color
+	add_theme_support( 'custom-background', array( 'default-color' => 'f7f7f7' ) );
+
+}
+add_action( 'after_setup_theme', 'eyelikedesign_starter_themesetup' );
+
+
+/**
+ * With the following function you can disable theme features
+ * used by the parent theme without breaking anything. Read the
+ * comments on each and follow the link, if you happen to not
+ * know what the function is for. Remove the // in front of the
+ * remove_theme_support('...'); calls to make them execute.
+ *
+ * @return void
+ */
+function eyelikedesign_starter_after_parent_theme_setup() {
+
+	/**
+	 * Hack added: 2012-10-04, Silvan Hagen
+	 *
+	 * This is a hack, to calm down PHP Notice, since
+	 * I'm not sure if it's a bug in WordPress or my
+	 * bad I'll leave it here: http://wordpress.org/support/topic/undefined-index-custom_image_header-in-after_setup_theme-of-child-theme
+	 */
+	if ( ! isset( $GLOBALS['custom_image_header'] ) )
+		$GLOBALS['custom_image_header'] = array();
+
+	if ( ! isset( $GLOBALS['custom_background'] ) )
+		$GLOBALS['custom_background'] = array();
+
+	// Remove custom header support: http://codex.wordpress.org/Custom_Headers
+	//remove_theme_support( 'custom-header' );
+
+	// Remove support for post formats: http://codex.wordpress.org/Post_Formats
+	//remove_theme_support( 'post-formats' );
+
+	// Remove featured images support: http://codex.wordpress.org/Post_Thumbnails
+	//remove_theme_support( 'post-thumbnails' );
+
+	// Remove custom background support: http://codex.wordpress.org/Custom_Backgrounds
+	//remove_theme_support( 'custom-background' );
+
+	// Remove automatic feed links support: http://codex.wordpress.org/Automatic_Feed_Links
+	//remove_theme_support( 'automatic-feed-links' );
+
+	// Remove editor styles: http://codex.wordpress.org/Editor_Style
+	//remove_editor_styles();
+
+	// Remove a menu from the theme: http://codex.wordpress.org/Navigation_Menus
+	//unregister_nav_menu( 'secondary' );
+
+}
+add_action( 'after_setup_theme', 'eyelikedesign_starter_after_parent_theme_setup', 11 );
+
+/**
+ * Add our theme specific js file and some Google Fonts
+ * @return void
+ */
+function eyelikedesign_starter_scripts() {
+
+	/**
+	 * Registers the child-theme.js
+	 *
+	 * Remove if you don't need this file,
+	 * it's empty by default.
+	 */
+	wp_enqueue_script(
+		'child-theme-js',
+		get_stylesheet_directory_uri() . '/javascripts/child-theme.js',
+		array( 'theme-js' ),
+		false,
+		true
+	);
+
+	/**
+	 * Registers the app.css
+	 *
+	 * If you don't need it, remove it.
+	 * The file is empty by default.
+	 */
+	wp_register_style(
+        'app-css', //handle
+        get_stylesheet_directory_uri() . '/stylesheets/app.css',
+        array( 'foundation-css' ),	// needs foundation
+        eyelikedesign_get_theme_version( false ) //version
+  	);
+  	wp_enqueue_style( 'app-css' );
+
+	/**
+	 * Adding google fonts
+	 *
+	 * This is the proper code to add google fonts
+	 * as seen in TwentyTwelve
+	 */
+	$protocol = is_ssl() ? 'https' : 'http';
+	$query_args = array( 'family' => 'Open+Sans:300,600' );
+	wp_enqueue_style(
+		'open-sans',
+		add_query_arg( $query_args, "$protocol://fonts.googleapis.com/css" ),
+		array(),
+		null
+	);
+}
+add_action('wp_enqueue_scripts', 'eyelikedesign_starter_scripts');
+
+/**
+ * Overwrite the default continue reading link
+ *
+ * This function is an example on how to overwrite
+ * the parent theme function to create continue reading
+ * links.
+ *
+ * @return string HTML link with text and permalink to the post/page/cpt
+ */
+function eyelikedesign_continue_reading_link() {
+	return ' <a class="read-more" href="'. esc_url( get_permalink() ) . '">' . __( ' Read on! &rarr;', 'eyelikedesign' ) . '</a>';
+}
+
+/**
+ * Overwrite the defaults of the Orbit shortcode script
+ *
+ * Accepts all the parameters from http://foundation.zurb.com/docs/orbit.php#optCode
+ * to customize the options for the orbit shortcode plugin.
+ *
+ * @param  array $args default args
+ * @return array       your args
+ */
+function eyelikedesign_orbit_script_args( $defaults ) {
+	$args = array(
+		'animation' 	=> 'fade',
+		'advanceSpeed' 	=> 8000,
+	);
+	return wp_parse_args( $args, $defaults );
+}
+add_filter( 'eld_orbit_script_args', 'eyelikedesign_orbit_script_args' );
+
+//Flexible Content
+//require(get_stylesheet_directory() . '/custom-fields/rows.php');
+
+//Choices for Additional Classes Rows Flexible Content Columns
+$keys = array('field_5704023ed4f95', 'field_57040731eaf04', 'field_570408c2eaf38', 'field_570408deeaf41' );
+
+foreach ($keys as $key ) {
+	add_filter('acf/load_field/key=' . $key, function($field) {
+	  //These can be dynamically generated using any PHP code\
+	  //$field['choices']['ClassName'] = 'Human Readable';
+	  $field['choices']['graybg'] = 'Gray Background';
+	  $field['choices']['redbg'] = 'Red Background';
+	  $field['choices']['lightgreenbg'] = 'Light Green Background';
+	  $field['choices']['matcher'] = 'Match Height';
+	  $field['choices']['text-center'] = 'Centered Text';
+	  return $field;
+	});
+
+
+	//Blanks the above for export. Probably wouldn't be necessary for production sites, as there would be no save feature for exported fields
+	add_filter('acf/prepare_field_for_export', function($field) {
+	 
+	  //If we're at the correct field
+	  if(isset($field['key']) && $field['key'] === $key) {
+	 
+	    //Blank out the select options with an empty array
+	    $field['choices'] = array();
+	  }
+	 
+	  return $field;
+	});
+
+}
+
+add_image_size( '300Square', 300, 300, true );
+add_image_size( '768', 768, false );
+add_image_size( '480', 480, false );
+add_image_size( '320', 320, false );
+add_image_size( '400Square', 400, 400, true );
+
+
+
+//Dev Only
+
+// Remove WP Version From Styles	
+add_filter( 'style_loader_src', 'sdt_remove_ver_css_js', 9999 );
+// Remove WP Version From Scripts
+add_filter( 'script_loader_src', 'sdt_remove_ver_css_js', 9999 );
+
+// Function to remove version numbers
+function sdt_remove_ver_css_js( $src ) {
+	if ( strpos( $src, 'ver=' ) )
+		$src = remove_query_arg( 'ver', $src );
+	return $src;
+}
+
+
+//register Directory Listing Custom Post Type
+
+// Register Custom Post Type
+function custom_post_type() {
+
+	$labels = array(
+		'name'                  => _x( 'Directory Listings', 'Post Type General Name', 'eyelikedesign' ),
+		'singular_name'         => _x( 'Directory Listing', 'Post Type Singular Name', 'eyelikedesign' ),
+		'menu_name'             => __( 'Directory Listings', 'eyelikedesign' ),
+		'name_admin_bar'        => __( 'Directory Listing', 'eyelikedesign' ),
+		'archives'              => __( 'Directory Archives', 'eyelikedesign' ),
+		'parent_item_colon'     => __( 'Parent Item:', 'eyelikedesign' ),
+		'all_items'             => __( 'All Items', 'eyelikedesign' ),
+		'add_new_item'          => __( 'Add New Item', 'eyelikedesign' ),
+		'add_new'               => __( 'Add New', 'eyelikedesign' ),
+		'new_item'              => __( 'New Item', 'eyelikedesign' ),
+		'edit_item'             => __( 'Edit Item', 'eyelikedesign' ),
+		'update_item'           => __( 'Update Item', 'eyelikedesign' ),
+		'view_item'             => __( 'View Item', 'eyelikedesign' ),
+		'search_items'          => __( 'Search Item', 'eyelikedesign' ),
+		'not_found'             => __( 'Not found', 'eyelikedesign' ),
+		'not_found_in_trash'    => __( 'Not found in Trash', 'eyelikedesign' ),
+		'featured_image'        => __( 'Featured Image', 'eyelikedesign' ),
+		'set_featured_image'    => __( 'Set featured image', 'eyelikedesign' ),
+		'remove_featured_image' => __( 'Remove featured image', 'eyelikedesign' ),
+		'use_featured_image'    => __( 'Use as featured image', 'eyelikedesign' ),
+		'insert_into_item'      => __( 'Insert into item', 'eyelikedesign' ),
+		'uploaded_to_this_item' => __( 'Uploaded to this item', 'eyelikedesign' ),
+		'items_list'            => __( 'Items list', 'eyelikedesign' ),
+		'items_list_navigation' => __( 'Items list navigation', 'eyelikedesign' ),
+		'filter_items_list'     => __( 'Filter items list', 'eyelikedesign' ),
+	);
+	$args = array(
+		'label'                 => __( 'Directory Listing', 'eyelikedesign' ),
+		'labels'                => $labels,
+		'supports'              => array('thumbnail', 'title'),
+		'hierarchical'          => false,
+		'public'                => true,
+		'show_ui'               => true,
+		'show_in_menu'          => true,
+		'menu_position'         => 5,
+		'show_in_admin_bar'     => true,
+		'show_in_nav_menus'     => true,
+		'can_export'            => true,
+		'has_archive'           => true,		
+		'exclude_from_search'   => false,
+		'publicly_queryable'    => true,
+		'capability_type'       => 'page',
+	);
+	register_post_type( 'directory_listing', $args );
+
+}
+add_action( 'init', 'custom_post_type', 0 );
+
+// Register Custom Taxonomy
+function directory_category() {
+
+	$labels = array(
+		'name'                       => _x( 'Directory Categories', 'Taxonomy General Name', 'eyelikedesign' ),
+		'singular_name'              => _x( 'Directory Category', 'Taxonomy Singular Name', 'eyelikedesign' ),
+		'menu_name'                  => __( 'Directory Categories', 'eyelikedesign' ),
+		'all_items'                  => __( 'All Directory Categories', 'eyelikedesign' ),
+		'parent_item'                => __( 'Parent Directory Category', 'eyelikedesign' ),
+		'parent_item_colon'          => __( 'Parent Directory Category:', 'eyelikedesign' ),
+		'new_item_name'              => __( 'New Directory Category', 'eyelikedesign' ),
+		'add_new_item'               => __( 'Add Directory Category', 'eyelikedesign' ),
+		'edit_item'                  => __( 'Edit Directory Category', 'eyelikedesign' ),
+		'update_item'                => __( 'Update Directory Category', 'eyelikedesign' ),
+		'view_item'                  => __( 'View Directory Category', 'eyelikedesign' ),
+		'separate_items_with_commas' => __( 'Separate items with commas', 'eyelikedesign' ),
+		'add_or_remove_items'        => __( 'Add or remove items', 'eyelikedesign' ),
+		'choose_from_most_used'      => __( 'Choose from the most used', 'eyelikedesign' ),
+		'popular_items'              => __( 'Popular Items', 'eyelikedesign' ),
+		'search_items'               => __( 'Search Items', 'eyelikedesign' ),
+		'not_found'                  => __( 'Not Found', 'eyelikedesign' ),
+		'no_terms'                   => __( 'No items', 'eyelikedesign' ),
+		'items_list'                 => __( 'Items list', 'eyelikedesign' ),
+		'items_list_navigation'      => __( 'Items list navigation', 'eyelikedesign' ),
+	);
+	$args = array(
+		'labels'                     => $labels,
+		'hierarchical'               => true,
+		'public'                     => true,
+		'show_ui'                    => true,
+		'show_admin_column'          => true,
+		'show_in_nav_menus'          => true,
+		'show_tagcloud'              => true,
+	);
+	register_taxonomy( 'directory_category', array( 'directory_listing' ), $args );
+
+}
+add_action( 'init', 'directory_category', 0 );
+
+//Register EarthKids CPT
+// Register Custom Post Type
+function earthkids() {
+
+	$labels = array(
+		'name'                  => _x( 'EarthKids', 'Post Type General Name', 'eyelikedesign' ),
+		'singular_name'         => _x( 'EarthKids', 'Post Type Singular Name', 'eyelikedesign' ),
+		'menu_name'             => __( 'EarthKids', 'eyelikedesign' ),
+		'name_admin_bar'        => __( 'EarthKids', 'eyelikedesign' ),
+		'archives'              => __( 'Item Archives', 'eyelikedesign' ),
+		'parent_item_colon'     => __( 'Parent Item:', 'eyelikedesign' ),
+		'all_items'             => __( 'All Items', 'eyelikedesign' ),
+		'add_new_item'          => __( 'Add New Item', 'eyelikedesign' ),
+		'add_new'               => __( 'Add New', 'eyelikedesign' ),
+		'new_item'              => __( 'New Item', 'eyelikedesign' ),
+		'edit_item'             => __( 'Edit Item', 'eyelikedesign' ),
+		'update_item'           => __( 'Update Item', 'eyelikedesign' ),
+		'view_item'             => __( 'View Item', 'eyelikedesign' ),
+		'search_items'          => __( 'Search Item', 'eyelikedesign' ),
+		'not_found'             => __( 'Not found', 'eyelikedesign' ),
+		'not_found_in_trash'    => __( 'Not found in Trash', 'eyelikedesign' ),
+		'featured_image'        => __( 'Featured Image', 'eyelikedesign' ),
+		'set_featured_image'    => __( 'Set featured image', 'eyelikedesign' ),
+		'remove_featured_image' => __( 'Remove featured image', 'eyelikedesign' ),
+		'use_featured_image'    => __( 'Use as featured image', 'eyelikedesign' ),
+		'insert_into_item'      => __( 'Insert into item', 'eyelikedesign' ),
+		'uploaded_to_this_item' => __( 'Uploaded to this item', 'eyelikedesign' ),
+		'items_list'            => __( 'Items list', 'eyelikedesign' ),
+		'items_list_navigation' => __( 'Items list navigation', 'eyelikedesign' ),
+		'filter_items_list'     => __( 'Filter items list', 'eyelikedesign' ),
+	);
+	$args = array(
+		'label'                 => __( 'EarthKids', 'eyelikedesign' ),
+		'labels'                => $labels,
+		'supports'              => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'trackbacks', 'revisions', 'custom-fields', 'page-attributes', 'post-formats', ),
+		'hierarchical'          => false,
+		'public'                => true,
+		'show_ui'               => true,
+		'show_in_menu'          => true,
+		'menu_position'         => 5,
+		'show_in_admin_bar'     => true,
+		'show_in_nav_menus'     => true,
+		'can_export'            => true,
+		'has_archive'           => true,
+		'rewrite'								=> array(
+				'slug' 							=> 'earthkids/all'
+				),
+		'exclude_from_search'   => false,
+		'publicly_queryable'    => true,
+		'capability_type'       => 'page',
+	);
+	register_post_type( 'earthkids', $args );
+
+}
+add_action( 'init', 'earthkids', 0 );
+
+
+/**
+* Gravity Wiz // Gravity Forms // Checkbox Count
+*
+* Get the total number of checkboxes checked. Useful when wanting to apply conditional logic based on the number of
+* checkboxes checked.
+*
+* @version	 2.0
+* @author    David Smith <david@gravitywiz.com>
+* @license   GPL-2.0+
+* @link      http://gravitywiz.com/...
+* @copyright 2014 Gravity Wiz
+*/
+class GW_Checkbox_Count {
+    private static $script_output;
+    function __construct( $args ) {
+        $this->_args = wp_parse_args( $args, array(
+            'form_id'            => false,
+            'count_field_id'     => false,
+	        'checkbox_field_id'  => null,
+            'checkbox_field_ids' => false
+        ) );
+	    if( isset( $this->_args['checkbox_field_id'] ) ) {
+			$this->_args['checkbox_field_ids'] = array( $this->_args['checkbox_field_id'] );
+	    }
+        add_filter( 'gform_pre_render',            array( $this, 'maybe_output_script' ) );
+        add_action( 'gform_register_init_scripts', array( $this, 'add_init_script' ) );
+        //add_action( 'gform_pre_validation',        array( $this, 'override_submitted_value') );
+    }
+    function maybe_output_script( $form ) {
+        if( $this->is_applicable_form( $form['id'] ) && ! self::$script_output )
+            $this->output_script();
+        return $form;
+    }
+    function output_script() {
+        ?>
+
+        <script type="text/javascript">
+            ( function( $ ) {
+                window.GWCheckboxCount = function( args ) {
+                    var self = this;
+                    // copy all args to current object: formId, fieldId
+                    for( prop in args ) {
+                        if( args.hasOwnProperty( prop ) )
+                            self[prop] = args[prop];
+                    }
+                    self.init = function() {
+	                    for( var i = 0; i < self.checkboxFieldIds.length; i++ ) {
+		                    var checkboxFieldId = self.checkboxFieldIds[ i ],
+			                    checkboxField   = $( '#input_' + self.formId + '_' + checkboxFieldId );
+		                    checkboxField.find( 'input[type="checkbox"]' ).click( function() {
+			                    self.updateCheckboxCount( self.formId, self.checkboxFieldIds, self.countFieldId );
+		                    } );
+	                    }
+                        self.updateCheckboxCount( self.formId, self.checkboxFieldIds, self.countFieldId );
+                    };
+                    self.updateCheckboxCount = function( formId, checkboxFieldIds, countFieldId ) {
+                        var countField    = $( '#input_' + formId + '_' + countFieldId ),
+                            count         = 0;
+	                    for( var i = 0; i < checkboxFieldIds.length; i++ ) {
+		                    var checkboxField = $( '#input_' + formId + '_' + checkboxFieldIds[ i ] );
+		                    count += checkboxField.find( 'input[type="checkbox"]' ).filter(':checked').length;
+	                    }
+                        if( parseInt( countField.val() ) != parseInt( count ) ) {
+	                        countField.val( count ).change();
+                        }
+                    };
+                    self.init();
+                }
+            } )( jQuery );
+        </script>
+
+        <?php
+        self::$script_output = true;
+    }
+    function add_init_script( $form ) {
+        if( ! $this->is_applicable_form( $form['id'] ) )
+            return;
+        $args = array(
+            'formId'           => $this->_args['form_id'],
+            'countFieldId'     => $this->_args['count_field_id'],
+            'checkboxFieldIds' => $this->_args['checkbox_field_ids']
+        );
+        $script = 'new GWCheckboxCount( ' . json_encode( $args ) . ' );';
+        $slug = implode( '_', array( 'gw_checkbox_count', $this->_args['form_id'], $this->_args['count_field_id'] ) );
+        GFFormDisplay::add_init_script( $this->_args['form_id'], $slug, GFFormDisplay::ON_PAGE_RENDER, $script );
+        return;
+    }
+    function override_submitted_value( $form ) {
+        //$_POST["input_{$this->count_field_id}"] = $day_count;
+        return $form;
+    }
+    function is_applicable_form( $form_id ) {
+        return $this->_args['form_id'] == $form_id;
+    }
+}
+new GW_Checkbox_Count( array(
+	'form_id'            => 5,
+	'count_field_id'     => 30,
+	'checkbox_field_id'  => array(31),
+) );
+
+
+// Woocommerce
+// First remove default wrapper
+remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10);
+remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10);
+
+// Then add new wrappers
+add_action('woocommerce_before_main_content', 'my_theme_wrapper_start', 10);
+add_action('woocommerce_after_main_content', 'my_theme_wrapper_end', 10);
+ 
+function my_theme_wrapper_start() {
+  echo '<div class="row">
+  	<div class="inner">
+  	<div class="twelve columns">';
+
+}
+ 
+function my_theme_wrapper_end() {
+  echo '</div>
+  	</div>
+  	</div>';
+}
+
+
+//My Classes to woocommerce
+require_once('includes/my-classes.php');
+
+
+
+function teachers_loop( $atts ) {
+	$atts = shortcode_atts( array(
+		'default' => 'values'
+	), $atts );
+	ob_start(); 
+	get_template_part('content', 'teachers-loop');
+	return ob_get_clean();
+}
+add_shortcode( 'teachers','teachers_loop' );
+
+function teachers2_loop( $atts ) {
+	$atts = shortcode_atts( array(
+		'default' => 'values'
+	), $atts );
+	ob_start(); 
+	get_template_part('content', 'teachers2-loop');
+	return ob_get_clean();
+}
+add_shortcode( 'teachers2','teachers2_loop' );
+
+
+add_filter( 'mpp_avatar_override', '__return_true' );
+
+class JDN_Create_Media_File {
+ 
+ var $post_id;
+ var $image_url;
+ var $wp_upload_url;
+ var $attachment_id;
+ 
+ /**
+ * Setup the class variables
+ */
+ public function __construct( $image_url, $post_id = 0 ) {
+ 
+ // Setup class variables
+ $this->image_url = esc_url( $image_url );
+ $this->post_id = absint( $post_id );
+ $this->wp_upload_url = $this->get_wp_upload_url();
+ $this->attachment_id = $this->attachment_id ?: false;
+ 
+ return $this->create_image_id();
+ 
+ }
+ 
+ /**
+ * Set the upload directory
+ */
+ private function get_wp_upload_url() {
+ $wp_upload_dir = wp_upload_dir();
+ return isset( $wp_upload_dir['url'] ) ? $wp_upload_dir['url'] : false;
+ }
+ 
+ /**
+ * Create the image and return the new media upload id.
+ *
+ * @see https://gist.github.com/hissy/7352933
+ *
+ * @see http://codex.wordpress.org/Function_Reference/wp_insert_attachment#Example
+ */
+ public function create_image_id() {
+ 
+ if( $this->attachment_id )
+ return $this->attachment_id;
+ 
+ if( empty( $this->image_url ) || empty( $this->wp_upload_url ) )
+ return false;
+ 
+ $filename = basename( $this->image_url );
+ 
+ $upload_file = wp_upload_bits( $filename, null, file_get_contents( $this->image_url ) );
+ 
+ if ( ! $upload_file['error'] ) {
+ $wp_filetype = wp_check_filetype( $filename, null );
+ $attachment = array(
+ 'post_mime_type' => $wp_filetype['type'],
+ 'post_parent' => $this->post_id,
+ 'post_title' => preg_replace('/\.[^.]+$/', '', $filename),
+ 'post_content' => '',
+ 'post_status' => 'inherit'
+ );
+ $attachment_id = wp_insert_attachment( $attachment, $upload_file['file'], $this->post_id );
+ 
+ if( ! is_wp_error( $attachment_id ) ) {
+ 
+ require_once( ABSPATH . "wp-admin" . '/includes/image.php' );
+ require_once( ABSPATH . 'wp-admin/includes/media.php' );
+ 
+ $attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload_file['file'] );
+ wp_update_attachment_metadata( $attachment_id, $attachment_data );
+ 
+ $this->attachment_id = $attachment_id;
+ 
+ return $attachment_id;
+ }
+ }
+ 
+ return false;
+ 
+ } // end function get_image_id
+}
+
+
+add_action( 'gform_activate_user', 'after_user_activate', 10, 3 );
+function after_user_activate( $user_id, $user_data, $signup_meta ) {
+    //add note to entry
+		$pf = get_user_meta($user_id, 'publicity_photo', false);
+		if($pf[0]) {
+			$create_image = new JDN_Create_Media_File( $pf[0] );
+			$image_id = $create_image->attachment_id;
+			add_user_meta($user_id, 'wp_metronet_image_id', $image_id);
+			$uposts = false;
+		$upost_id = false;
+	$post_args = array(
+			'post_type' => 'mt_pp',
+			'author' => $user_id, 
+			'post_status' => 'publish'
+		);
+		$uposts = get_posts( $post_args );
+		if ( !$uposts ) {
+			$upost_id = wp_insert_post( array(
+				'post_author' => $user_id,
+				'post_type' => 'mt_pp',
+				'post_status' => 'publish',
+			) );
+		} else {
+			$upost = end( $uposts );
+			$upost_id = $upost->ID;
+		}
+			if(has_post_thumbnail( $upost_id )) {
+			} else {
+				set_post_thumbnail($upost_id, $image_id );
+			}
+		}
+		add_user_meta($user->id, 'wp_metronet_avatar_override', 'on');
+}
+
+add_action('admin_head', 'my_custom_fonts');
+
+function my_custom_fonts() {
+  echo '<style>
+    		.user-edit-php tr.user-profile-picture {display:none;}
+  </style>';
+}
+
+add_filter( 'image_size_names_choose', 'my_custom_sizes' );
+ 
+function my_custom_sizes( $sizes ) {
+    return array_merge( $sizes, array(
+    	'300Square' => __('300px Square'),
+    	'400Square' => __('400px Square')
+    ) );
+}
